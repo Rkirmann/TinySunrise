@@ -22,15 +22,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TimePicker;
 
 import com.cyhex.flashcom.lib.Transmitter;
 
 import java.sql.Time;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
+
+import static android.support.v7.app.AppCompatDelegate.MODE_NIGHT_YES;
+import static android.support.v7.app.AppCompatDelegate.setDefaultNightMode;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,14 +48,14 @@ public class MainActivity extends AppCompatActivity {
     //private PulseView pulseView;
     private CameraManager mCameraManager;
     private String mCameraId;
-    GregorianCalendar calendar;
-
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setDefaultNightMode(MODE_NIGHT_YES);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -57,10 +66,8 @@ public class MainActivity extends AppCompatActivity {
         //flash
         boolean isFlashAvailable = getApplicationContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
-
-        if (!isFlashAvailable) {
+        if (!isFlashAvailable)
             showNoFlashError();
-        }
         mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             assert mCameraManager != null;
@@ -125,33 +132,28 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendData(View view) {
         //EditText editTest = findViewById(R.id.editText);
-        TimePicker editTest = findViewById(R.id.simpleTimePicker); //R.id.simpleTimePicker
+        TimePicker editTest = findViewById(R.id.simpleTimePicker);
+        //editTest.setIs24HourView(true);
         //final String data = editTest.getText().toString();
         final int hour = editTest.getHour();
         final int minute = editTest.getMinute();
-
-        Date date = new Date();
-        calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY, hour);// for 6 hour
-        calendar.set(Calendar.MINUTE, minute);// for 0 min
-        calendar.set(Calendar.SECOND, 0);// for 0 sec
-        System.out.println("set time: " + calendar.getTime());// print 'Mon Mar 28 06:00:00 ALMT 2016'
-
-        Date now = calendar.getTime();
-        System.out.println("date now:" + now);
-
-        long diff = Math.abs(now.getTime() - date.getTime());
-        diff = TimeUnit.MILLISECONDS.toMinutes(diff);
-        final String data = String.valueOf(diff);
-
+        LocalDateTime from = LocalDateTime.of(LocalDate.now(), LocalTime.now());
+        System.out.println("date now:" + from);
+        LocalDateTime to = LocalDateTime.of(LocalDate.now(), LocalTime.of(hour, minute));
+        if (from.isAfter(to))
+            to = to.plusDays(1);
+        System.out.println("date to: " + to);
+        Duration diff = Duration.between(from, to).plusMinutes(1);
+        final String data = String.valueOf(diff.toMinutes());
         System.out.println("sending: " + data + " minutes");
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
 
 
-        progress = ProgressDialog.show(MainActivity.this, "Sending", "Sending data: " + data);
+        progress = ProgressDialog.show(MainActivity.this, "Sending", "Setting alarm in: " + data + " minutes.");
+
+
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
