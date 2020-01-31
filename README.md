@@ -3,6 +3,8 @@
  
  Communication between Android phone and Attiny85.
  Using flashlight as transmitter and LED as reciever. 
+ [Tests of LED and Various Light Sensors](https://www.instructables.com/id/Tests-of-LEDs-and-Various-Light-Sensors/)
+
 
 
 
