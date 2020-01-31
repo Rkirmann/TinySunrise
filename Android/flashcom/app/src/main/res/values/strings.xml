@@ -4,5 +4,6 @@
     <string name="app_name">FlashCom</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="wake_me_up">Wake me up</string>
 
 </resources>

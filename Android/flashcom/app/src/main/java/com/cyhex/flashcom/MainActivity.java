@@ -16,26 +16,22 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.cyhex.flashcom.lib.Transmitter;
 
-import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.concurrent.TimeUnit;
 
 import static android.support.v7.app.AppCompatDelegate.MODE_NIGHT_YES;
 import static android.support.v7.app.AppCompatDelegate.setDefaultNightMode;
@@ -48,20 +44,23 @@ public class MainActivity extends AppCompatActivity {
     //private PulseView pulseView;
     private CameraManager mCameraManager;
     private String mCameraId;
+    SeekBar bar;
+    TextView text;
+    TimePicker time;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.fragment_main);
 
         setDefaultNightMode(MODE_NIGHT_YES);
 
-        if (savedInstanceState == null) {
+        /*if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
-        }
+        }*/
 
         //flash
         boolean isFlashAvailable = getApplicationContext().getPackageManager()
@@ -76,8 +75,38 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        //timepicker
+        time = findViewById(R.id.simpleTimePicker);
+        boolean use24HourClock = DateFormat.is24HourFormat(getApplicationContext());
+        time.setIs24HourView(use24HourClock);
+
+        //SeekBar
+        bar = findViewById(R.id.seekBar);
+        int progress = bar.getProgress();
+        text = findViewById(R.id.textView);
+        text.setText("Duration: " + progress + "min");
+
+        // set a change listener on the SeekBar
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // TODO Auto-generated method stub
+                text.setText("Duration: " + progress + "min");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
 
     }
+
+
+
     public void showNoFlashError() {
         AlertDialog alert = new AlertDialog.Builder(this)
                 .create();
@@ -90,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
         });
         alert.show();
     }
+
+
 
 
     @Override
@@ -131,12 +162,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void sendData(View view) {
-        //EditText editTest = findViewById(R.id.editText);
-        TimePicker editTest = findViewById(R.id.simpleTimePicker);
-        //editTest.setIs24HourView(true);
-        //final String data = editTest.getText().toString();
-        final int hour = editTest.getHour();
-        final int minute = editTest.getMinute();
+        final int hour = time.getHour();
+        final int minute = time.getMinute();
         LocalDateTime from = LocalDateTime.of(LocalDate.now(), LocalTime.now());
         System.out.println("date now:" + from);
         LocalDateTime to = LocalDateTime.of(LocalDate.now(), LocalTime.of(hour, minute));
