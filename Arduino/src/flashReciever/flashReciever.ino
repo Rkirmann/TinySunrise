@@ -4,8 +4,8 @@
 #endif
 
 #define in A1
-#define out2 0
-#define out 1
+#define out 0
+#define out2 1
 int msDeley = 200;
 int sensorValue = 0;
 int ambientLight = 0;
@@ -25,7 +25,8 @@ String recieved = "";
 
 unsigned long timer;
 float minutes;
-boolean start = false;
+boolean startTimer = false;
+boolean firstMessage = true;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -106,34 +107,36 @@ void loop() {
     }
 
     // message recieved
-    if (inByte.length() == 8) {
+    if (inByte.length() == 8 && firstMessage) {
         const char *c = inByte.c_str();
         recieved += (char)strtol(c, NULL, 2);
         // for testing
         // if (recieved == "1") digitalWrite(out, HIGH);
-
         inByte = "";
-
-        // deep sleep for received millis
         int numbers = recieved.toInt();
-        if (numbers > 10)
-            timer = numbers;
-        else
-            minutes = float( numbers );
-        start = true;
+        timer = numbers;
+        firstMessage = false;
+    } else if (inByte.length() == 8 && !firstMessage) {
+        const char *c = inByte.c_str();
+        recieved += (char)strtol(c, NULL, 2);
+        inByte = "";
+        int numbers = recieved.toInt();
+        minutes = float(numbers);
+        firstMessage = true;
+        startTimer = true;
     }
 
     // snore for given time
-    if (start) {
-        snore(timer*60000);
+    if (startTimer) {
+        snore(timer * 60000);
         // fade in from min to max in increments of 5 points:
         for (int fadeValue = 0; fadeValue <= 255; fadeValue++) {
             // sets the value (range from 0 to 255):
             analogWrite(out, fadeValue);
             analogWrite(out2, fadeValue);
             // wait for x milliseconds to see the dimming effect
-            delay(minutes/255*60000);
+            delay(minutes / 255 * 60000);
         }
-        start = false;
+        startTimer = false;
     }
 }
