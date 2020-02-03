@@ -25,7 +25,6 @@ String recieved = "";
 
 unsigned long timer;
 float minutes;
-boolean startTimer = false;
 boolean firstMessage = true;
 
 // the setup routine runs once when you press reset:
@@ -43,15 +42,9 @@ void setup() {
     }
     ambientLight = ambientLight / 100 * 1.75;
     // ambientLight = max(500, ambientLight);
-
-    attachInterrupt(0, loop, RISING);
 }
 
-void wakeUp() {
-    sbi(ADCSRA, ADEN);  // switch Analog to Digitalconverter ON
-    sleep_disable();  // System continues execution here when watchdog timed out
-    loop();
-}
+
 
 char getBinChar() {
     if (signalStateLast == 1) {
@@ -123,20 +116,27 @@ void loop() {
         int numbers = recieved.toInt();
         minutes = float(numbers);
         firstMessage = true;
-        startTimer = true;
+        startTimer();
     }
+}  // end loop
 
-    // snore for given time
-    if (startTimer) {
-        snore(timer * 60000);
-        // fade in from min to max in increments of 5 points:
-        for (int fadeValue = 0; fadeValue <= 255; fadeValue++) {
-            // sets the value (range from 0 to 255):
-            analogWrite(out, fadeValue);
-            analogWrite(out2, fadeValue);
-            // wait for x milliseconds to see the dimming effect
-            delay(minutes / 255 * 60000);
-        }
-        startTimer = false;
+void startTimer() {
+    // will be called when pin D2 goes low
+    attachInterrupt(0 /*as in INT0*/, wakeUp, RISING);
+    EIFR = bit(INTF0);  // clear flag for interrupt 0
+    snore(timer * 60000);
+    // fade in from min to max in increments of 5 points:
+    for (int fadeValue = 0; fadeValue <= 255; fadeValue++) {
+        // sets the value (range from 0 to 255):
+        analogWrite(out, fadeValue);
+        analogWrite(out2, fadeValue);
+        // wait for x milliseconds to see the dimming effect
+        delay(minutes / 255 * 60000);
     }
+}
+
+void wakeUp() {
+    sleep_disable();     // System continues execution here
+    sbi(ADCSRA, ADEN);   // switch Analog to Digitalconverter ON
+    detachInterrupt(0);  // precautionary while we do other stuff
 }
