@@ -7,11 +7,11 @@
  Without an accurate external clock, transmission speed can be low: currently around 6bps, also to keep accurate time for longer periods. 
  
  Some sources:
- [Tests of LED and Various Light Sensors](https://www.instructables.com/id/Tests-of-LEDs-and-Various-Light-Sensors/)
- [PWM Exponential LED Fading](https://diarmuid.ie/blog/pwm-exponential-led-fading-on-arduino-or-other-platforms)
- [Timed deep sleep for Attiny](https://github.com/connornishijima/TinySnore)
- [Internal battery level reading](https://github.com/cano64/ArduinoSystemStatus)
- [Power saving techniques for microprocessors](https://www.gammon.com.au/forum/?id=11497)
+ [Tests of LED and Various Light Sensors](https://www.instructables.com/id/Tests-of-LEDs-and-Various-Light-Sensors/)  
+ [PWM Exponential LED Fading](https://diarmuid.ie/blog/pwm-exponential-led-fading-on-arduino-or-other-platforms)  
+ [Timed deep sleep for Attiny](https://github.com/connornishijima/TinySnore)  
+ [Internal battery level reading](https://github.com/cano64/ArduinoSystemStatus)  
+ [Power saving techniques for microprocessors](https://www.gammon.com.au/forum/?id=11497)  
 
 
 
