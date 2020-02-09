@@ -1,4 +1,4 @@
-# flashCom2
+# TinySunrise
  Fork of https://github.com/cyhex/flashCom
  
  
