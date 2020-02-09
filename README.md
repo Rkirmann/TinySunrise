@@ -18,7 +18,8 @@ Design:
 
 ![PCB](https://i.ibb.co/zmmqdgV/PCB-PCB-2020-01-27-19-44-28-20200131153600.png)  
 PCB design using a coin cell battery, ATtiny85, 8MHz crystal and 3 leds to capture the light signal.
-![App](https://raw.githubusercontent.com/Rkirmann/flashCom2/master/Android/Screenshot_2020-02-09-22-23-20-495_com.cyhex.flashcom.jpg  | width=100)
-<img src="https://raw.githubusercontent.com/Rkirmann/flashCom2/master/Android/Screenshot_2020-02-09-22-23-20-495_com.cyhex.flashcom.jpg" width="500">
+
+
+<img src="https://raw.githubusercontent.com/Rkirmann/flashCom2/master/Android/Screenshot_2020-02-09-22-23-20-495_com.cyhex.flashcom.jpg" width="250">
 
 
