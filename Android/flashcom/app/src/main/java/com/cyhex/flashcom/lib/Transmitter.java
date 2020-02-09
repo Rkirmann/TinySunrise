@@ -45,6 +45,9 @@ public class Transmitter {
     public void transmit(String str) throws InterruptedException {
         String binaryString = toBinaryString(str);
         Log.i("Transmitter", binaryString);
+        on();
+        Thread.sleep(1000);
+        off();
         for (char c : binaryString.toCharArray()) {
             on();
             Thread.sleep(timeLightPulse);
@@ -58,6 +61,7 @@ public class Transmitter {
         on();
         Thread.sleep(timeLightPulse);
         off();
+        //Thread.sleep(timeHigh*4);
     }
 
     private void on() {

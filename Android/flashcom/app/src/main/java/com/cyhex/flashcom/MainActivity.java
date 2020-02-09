@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     SeekBar bar;
     TextView text;
     TimePicker time;
+    int duration;
 
 
     @Override
@@ -82,16 +83,17 @@ public class MainActivity extends AppCompatActivity {
 
         //SeekBar
         bar = findViewById(R.id.seekBar);
-        int progress = bar.getProgress();
+        duration = bar.getProgress();
         text = findViewById(R.id.textView);
-        text.setText("Duration: " + progress + "min");
+        text.setText("Duration: " + duration + "min");
 
         // set a change listener on the SeekBar
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // TODO Auto-generated method stub
-                text.setText("Duration: " + progress + "min");
+                duration = bar.getProgress();
+                text.setText("Duration: " + duration + "min");
             }
 
             @Override
@@ -172,13 +174,14 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("date to: " + to);
         Duration diff = Duration.between(from, to).plusMinutes(1);
         final String data = String.valueOf(diff.toMinutes());
+        final String data2 = String.valueOf(duration);
         System.out.println("sending: " + data + " minutes");
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
 
 
-        progress = ProgressDialog.show(MainActivity.this, "Sending", "Setting alarm in: " + data + " minutes.");
+        progress = ProgressDialog.show(MainActivity.this, "Sending", "Setting alarm in: " + data + " minutes. Druation: " + duration);
 
 
         Thread t = new Thread(new Runnable() {
@@ -188,7 +191,9 @@ public class MainActivity extends AppCompatActivity {
                     t.setTimeHigh(Integer.parseInt(sharedPref.getString("high_pulse", "60")));
                     t.setTimeLow(Integer.parseInt(sharedPref.getString("low_pulse", "40")));
                     t.setTimeLightPulse(Integer.parseInt(sharedPref.getString("light_pulse", "50")));
-                    t.transmit(data);
+                    String toSend = data + "t" + data2 + "f";
+                    t.transmit(toSend);
+                    //t.transmit(data2);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -1,5 +1,6 @@
 {
     "board": "ATTinyCore:avr:attinyx5",
     "configuration": "LTO=enable,TimerClockSource=default,chip=85,clock=8internal,eesave=aenable,bod=disable,millis=enabled",
-    "sketch": "flashReciever.ino"
+    "sketch": "flashReciever.ino",
+    "programmer": "USBasp"
 }
