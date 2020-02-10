@@ -20,6 +20,7 @@ long int signalLen = 0;
 String inByte = "";
 String recieved = "";
 
+boolean sleep = true; // better sleep system?
 boolean alarm = false;
 long timer;
 long duration;
@@ -90,17 +91,19 @@ void loop() {
         digitalWrite(out2, LOW);
     }
 
-    if (signalStateCurrent == 0 && signalStateLast == 0 &&
+    /* if (signalStateCurrent == 0 && signalStateLast == 0 &&
         signalLen > signalLenHigh * 3) {
         //timerMillis += millis();
         snore(500);
         snoreMillis += 500;
-    }
+    } */
+    
   
 
     if (signalStateCurrent == signalStateLast) {
         signalLen = millis() - signalLastTime;
     } else {
+        sleep = false; // better sleep?
         signalLen = millis() - signalLastTime;
         // signal change
         char cBit = getBinChar();
@@ -119,6 +122,15 @@ void loop() {
         inByte = "";
         // Serial.println("recieved "+recieved);
         if (recieved[recieved.length() - 1] == 'f') decode();
+    }
+
+    // better sleep?
+    // less than 500ms to alarm
+    if (sleep /*&& !(millis() + snoreMillis - timerMillis >= timer-500 && alarm)*/){
+        snore(500);
+        snoreMillis += 500;
+    } else if (!sleep && signalLen > signalLenHigh * 3 && signalStateCurrent == 0 ){
+        sleep = true;
     }
 
 }  // end loop
@@ -177,8 +189,8 @@ void wakeUP() {
     for (int fadeValue = 0; fadeValue <= 255; fadeValue++) {
         // sets the value (range from 0 to 255):
         brightness = pow (2, (fadeValue / R)) - 1;
-        analogWrite(out, brightness);
-        analogWrite(out2, brightness);
+        analogWrite(out, 1023);
+        analogWrite(out2, 1023);
         // wait for x milliseconds to see the dimming effect
         delay(delayIncrement);
         //timerMillis += delayIncrement;
