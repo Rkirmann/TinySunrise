@@ -3,7 +3,6 @@
 #define in A1
 #define out 0
 #define out2 1
-int msDeley = 200;
 int sensorValue = 0;
 int ambientLight = 0;
 
@@ -22,8 +21,8 @@ String recieved = "";
 
 boolean sleep = true; // better sleep system?
 boolean alarm = false;
-long timer;
-long duration;
+unsigned long timer;
+unsigned long duration;
 
 unsigned long timerMillis = 0;
 unsigned long snoreMillis = 0;
@@ -91,6 +90,7 @@ void loop() {
         digitalWrite(out2, LOW);
     }
 
+    // sleep
     /* if (signalStateCurrent == 0 && signalStateLast == 0 &&
         signalLen > signalLenHigh * 3) {
         //timerMillis += millis();
@@ -125,9 +125,9 @@ void loop() {
     }
 
     // better sleep?
-    // less than 500ms to alarm
-    if (sleep /*&& !(millis() + snoreMillis - timerMillis >= timer-500 && alarm)*/){
-        snore(500);
+    // don't sleep when less than 1000ms to alarm
+    if (sleep /* && millis() + snoreMillis - timerMillis < timer-1000 && alarm */){
+        //snore(500);
         snoreMillis += 500;
     } else if (!sleep && signalLen > signalLenHigh * 3 && signalStateCurrent == 0 ){
         sleep = true;
@@ -137,8 +137,8 @@ void loop() {
 
 void decode() {
     recieved.remove(recieved.length() - 1, 1);
-    String x = getValue(recieved, 't', 0);
-    String y = getValue(recieved, 't', 1);
+    String x = split(recieved, 't', 0);
+    String y = split(recieved, 't', 1);
     recieved = "";
     // Serial.println("x "+x);
     // Serial.println("y "+y);
@@ -150,7 +150,8 @@ void decode() {
 
     if (timer > 0) startTimer();
 }
-String getValue(String data, char separator, int index) {
+
+String split(String data, char separator, int index) {
     int found = 0;
     int strIndex[] = {0, -1};
     int maxIndex = data.length() - 1;
@@ -171,12 +172,9 @@ void startTimer() {
     duration = duration * 60000;
     timerMillis = millis();
     for (int fadeValue = 255; fadeValue > 0; fadeValue--) {
-        // sets the value (range from 0 to 255):
         analogWrite(out, fadeValue);
         analogWrite(out2, fadeValue);
-        // wait for x milliseconds to see the dimming effect
         delay(10);
-        //timerMillis += 10;
     }
 }
 
@@ -185,19 +183,14 @@ void wakeUP() {
   timerMillis = millis();
   int brightness = 0;
   unsigned long delayIncrement = duration / 255;
-    // fade in from min to max in increments of 5 points:
     for (int fadeValue = 0; fadeValue <= 255; fadeValue++) {
-        // sets the value (range from 0 to 255):
+        // linear brightness calculation
         brightness = pow (2, (fadeValue / R)) - 1;
-        analogWrite(out, 1023);
-        analogWrite(out2, 1023);
-        // wait for x milliseconds to see the dimming effect
+        analogWrite(out, brightness);
+        analogWrite(out2, brightness);
+        
         delay(delayIncrement);
-        //timerMillis += delayIncrement;
-
     }
     digitalWrite(out, LOW);
     digitalWrite(out2, LOW);
-    
-    
 }
