@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressDialog progress;
     private SharedPreferences sharedPref;
-    //private PulseView pulseView;
     private CameraManager mCameraManager;
     private String mCameraId;
     SeekBar bar;
@@ -57,13 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
         setDefaultNightMode(MODE_NIGHT_YES);
 
-        /*if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }*/
-
-        //flash
         boolean isFlashAvailable = getApplicationContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         if (!isFlashAvailable)
@@ -164,34 +156,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void sendData(View view) {
-        final int hour = time.getHour();
-        final int minute = time.getMinute();
-        LocalDateTime from = LocalDateTime.of(LocalDate.now(), LocalTime.now());
-        System.out.println("date now:" + from);
-        LocalDateTime to = LocalDateTime.of(LocalDate.now(), LocalTime.of(hour, minute));
-        if (from.isAfter(to))
-            to = to.plusDays(1);
-        System.out.println("date to: " + to);
-        Duration diff = Duration.between(from, to).plusMinutes(1);
-        final String data = String.valueOf(diff.toMinutes());
-        final String data2 = String.valueOf(duration);
-        System.out.println("sending: " + data + " minutes");
-
+        Duration diff = getAlarmTimeInMinutes();
+        final String alarmTime = String.valueOf(diff.toMinutes());
+        final String alarmDuration = String.valueOf(duration);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-
-
-        progress = ProgressDialog.show(MainActivity.this, "Sending", "Setting alarm in: " + data + " minutes. Druation: " + duration);
-
-
-        Thread t = new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
                     Transmitter t = new Transmitter(mCameraManager, mCameraId);
                     t.setTimeHigh(Integer.parseInt(sharedPref.getString("high_pulse", "60")));
                     t.setTimeLow(Integer.parseInt(sharedPref.getString("low_pulse", "40")));
                     t.setTimeLightPulse(Integer.parseInt(sharedPref.getString("light_pulse", "50")));
-                    String toSend = data + "t" + data2 + "f";
+                    String toSend = alarmTime + "t" + alarmDuration + "f";
                     t.transmit(toSend);
                     //t.transmit(data2);
                 } catch (InterruptedException e) {
@@ -200,9 +177,35 @@ public class MainActivity extends AppCompatActivity {
                 handler.sendEmptyMessage(0);
             }
         });
-        t.setPriority(Thread.MAX_PRIORITY);
-        t.start();
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
 
+        createProgressDialog(diff, thread);
+    }
+
+    private Duration getAlarmTimeInMinutes(){
+        final int hour = time.getHour();
+        final int minute = time.getMinute();
+        LocalDateTime timeFrom = LocalDateTime.of(LocalDate.now(), LocalTime.now());
+        LocalDateTime timeTo = LocalDateTime.of(LocalDate.now(), LocalTime.of(hour, minute));
+        if (timeFrom.isAfter(timeTo))
+            timeTo = timeTo.plusDays(1);
+        return Duration.between(timeFrom, timeTo).plusMinutes(1);
+    }
+
+    private void createProgressDialog(Duration time, final Thread thread) {
+        long hours = time.getSeconds() / 3600;
+        int minutes = (int) ((time.getSeconds() % 3600) / 60);
+
+        progress = new ProgressDialog(this);
+        progress.setTitle("Sending");
+        progress.setMessage("Setting alarm in " + hours + "h, " + minutes + "min");
+        progress.setButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                thread.interrupt();
+            }
+        });
+        progress.show();
     }
 
     @SuppressLint("HandlerLeak")
