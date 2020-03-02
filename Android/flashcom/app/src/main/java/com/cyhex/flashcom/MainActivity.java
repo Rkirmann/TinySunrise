@@ -28,6 +28,7 @@ import android.widget.TimePicker;
 
 import com.cyhex.flashcom.lib.Transmitter;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,19 +44,57 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPref;
     private CameraManager mCameraManager;
     private String mCameraId;
-    SeekBar bar;
-    TextView text;
-    TimePicker time;
-    int duration;
+    private SeekBar bar;
+    private TextView text;
+    private TimePicker time;
+    private int duration;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
-
         setDefaultNightMode(MODE_NIGHT_YES);
+        initFlash();
+        createTimePicker();
+        createSeekBar();
+        setOnSeekBarChangeListener();
+    }
 
+
+    private void createTimePicker(){
+        time = findViewById(R.id.simpleTimePicker);
+        boolean use24HourClock = DateFormat.is24HourFormat(getApplicationContext());
+        time.setIs24HourView(use24HourClock);
+    }
+
+    private void createSeekBar() {
+        bar = findViewById(R.id.seekBar);
+        duration = bar.getProgress();
+        text = findViewById(R.id.textView);
+        text.setText(MessageFormat.format("Duration: {0}min", duration));
+    }
+
+    private void setOnSeekBarChangeListener() {
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // TODO Auto-generated method stub
+                duration = bar.getProgress();
+                text.setText(MessageFormat.format("Duration: {0}min", duration));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+    }
+
+    private void initFlash(){
         boolean isFlashAvailable = getApplicationContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         if (!isFlashAvailable)
@@ -67,39 +106,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
-
-        //timepicker
-        time = findViewById(R.id.simpleTimePicker);
-        boolean use24HourClock = DateFormat.is24HourFormat(getApplicationContext());
-        time.setIs24HourView(use24HourClock);
-
-        //SeekBar
-        bar = findViewById(R.id.seekBar);
-        duration = bar.getProgress();
-        text = findViewById(R.id.textView);
-        text.setText("Duration: " + duration + "min");
-
-        // set a change listener on the SeekBar
-        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                // TODO Auto-generated method stub
-                duration = bar.getProgress();
-                text.setText("Duration: " + duration + "min");
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
     }
-
-
 
     public void showNoFlashError() {
         AlertDialog alert = new AlertDialog.Builder(this)
@@ -114,12 +121,8 @@ public class MainActivity extends AppCompatActivity {
         alert.show();
     }
 
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -137,22 +140,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_main, container, false);
-        }
-    }
-
 
 
     public void sendData(View view) {
